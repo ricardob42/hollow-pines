@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#0e120d"/>
+<title>Hollow Pines</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<style>
+:root{--moss:#0e120d;--bone:#e6e1cf;--lichen:#8a9a5b;--wound:#b5402a;font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--moss);color:var(--bone);user-select:none;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+#vig{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 14vmax rgba(181,64,42,.95);opacity:var(--v,0)}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;justify-content:center;padding:max(6vmin,env(safe-area-inset-left));background:linear-gradient(90deg,rgba(14,18,13,.93),rgba(14,18,13,.72) 40%,rgba(14,18,13,.08) 78%)}
+.screen.on{display:flex}.screen>*{max-width:32rem}
+h1{font:600 clamp(2.8rem,10vmin,6rem)/.92 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;letter-spacing:-.015em}
+h2{font:600 clamp(2rem,6vmin,3rem)/1 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;margin-bottom:1.2rem}
+.sub{margin:.9rem 0 1.8rem;opacity:.72}
+.btn{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;color:var(--bone);font-size:1.15rem;font-weight:500;padding:.75rem 1rem;cursor:pointer}
+.btn:hover,.btn:focus-visible{border-color:var(--lichen);background:rgba(138,154,91,.13);outline:0}
+dl{display:grid;grid-template-columns:auto 1fr;gap:.15rem 1.2rem;margin-top:1.8rem;font-size:.88rem;opacity:.7}dt{color:var(--lichen)}
+.stat{display:flex;justify-content:space-between;border-bottom:1px solid rgba(230,225,207,.15);padding:.4rem 0;font-variant-numeric:tabular-nums}
+.stat b{font-size:1.3rem}
+label{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.55rem 0;border-bottom:1px solid rgba(230,225,207,.12)}
+select,input[type=range]{accent-color:var(--lichen);background:var(--moss);color:var(--bone);border:1px solid rgba(230,225,207,.3);padding:.25rem;max-width:11rem}
+small{opacity:.6;display:block;margin:.6rem 0}
+#hud{position:fixed;inset:0;pointer-events:none;font-variant-numeric:tabular-nums}#hud[hidden]{display:none}
+#cross{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--bone);opacity:.85;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+#hm{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px;border:2px solid var(--wound);transform:rotate(45deg);opacity:0}
+.hc{position:absolute;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.tl{top:max(1rem,env(safe-area-inset-top));left:max(1rem,env(safe-area-inset-left))}
+.bl{bottom:max(1rem,env(safe-area-inset-bottom));left:max(1rem,env(safe-area-inset-left));width:min(15rem,36vw)}
+.br{bottom:max(1rem,env(safe-area-inset-bottom));right:max(1rem,env(safe-area-inset-right));text-align:right}
+#time{font-size:1.6rem;font-weight:600}#ammo{font-size:2rem;font-weight:600}
+.bar{height:6px;background:rgba(230,225,207,.2)}#hp{display:block;height:100%;width:100%;background:var(--lichen);transition:width .15s}
+#pausebtn{pointer-events:auto;position:absolute;top:max(1rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));background:rgba(14,18,13,.5);border:1px solid rgba(230,225,207,.35);color:var(--bone);width:2.6rem;height:2.6rem;border-radius:50%}
+#touch{position:fixed;inset:0;pointer-events:none}#touch[hidden]{display:none}
+#lookzone{position:absolute;right:0;top:0;width:58%;height:100%;pointer-events:auto}
+#stickzone{position:absolute;left:4vmin;bottom:5vmin;width:34vmin;height:34vmin;max-width:170px;max-height:170px;border-radius:50%;border:2px solid rgba(230,225,207,.3);pointer-events:auto;display:grid;place-items:center}
+#knob{width:42%;height:42%;border-radius:50%;background:rgba(230,225,207,.38)}
+.b{position:absolute;pointer-events:auto;width:15vmin;height:15vmin;max-width:68px;max-height:68px;border-radius:50%;border:2px solid rgba(230,225,207,.4);background:rgba(14,18,13,.5);color:var(--bone);font-size:.72rem}
+.b.on{background:rgba(138,154,91,.5)}.b.f{width:21vmin;height:21vmin;max-width:96px;max-height:96px;right:5vmin;bottom:6vmin}
+#rotate{position:fixed;inset:0;display:none;place-items:center;text-align:center;background:var(--moss);z-index:9;padding:2rem}#rotate.on{display:grid}
+@media (prefers-reduced-motion:reduce){#hp{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas><div id="vig"></div>
+<div id="hud" hidden>
+  <div id="cross"></div><div id="hm"></div>
+  <div class="hc tl"><div id="time">0:00</div><div id="score">0</div><div id="kills">0 kills</div></div>
+  <div class="hc bl"><div class="bar"><i id="hp"></i></div></div>
+  <div class="hc br"><div id="wname"></div><div id="ammo"></div></div>
+  <button id="pausebtn" aria-label="Pause">II</button>
+</div>
+<div id="touch" hidden>
+  <div id="lookzone"></div><div id="stickzone"><div id="knob"></div></div>
+  <button class="b f" data-act="fire">Fire</button>
+  <button class="b" data-act="jump" style="right:5vmin;bottom:32vmin">Jump</button>
+  <button class="b" data-act="reload" style="right:25vmin;bottom:24vmin">Reload</button>
+  <button class="b" data-act="swap" style="right:26vmin;bottom:6vmin">Swap</button>
+  <button class="b" data-act="crouch" style="right:5vmin;bottom:50vmin">Crouch</button>
+</div>
+<main id="menu" class="screen">
+  <h1>Hollow<br/>Pines</h1>
+  <p class="sub">Alone in the forest. They keep coming. Stay alive.</p>
+  <button class="btn" id="b-play">Play</button>
+  <button class="btn" id="b-set">Settings</button>
+  <dl><dt>WASD</dt><dd>move</dd><dt>Shift / C / Space</dt><dd>sprint, crouch, jump</dd><dt>Mouse</dt><dd>aim, fire</dd><dt>R</dt><dd>reload</dd><dt>1 2 3</dt><dd>rifle, pistol, knife</dd><dt>Esc</dt><dd>pause</dd></dl>
+</main>
+<main id="settings" class="screen">
+  <h2>Settings</h2>
+  <label>Quality <select id="s-quality"><option value="auto">Auto</option><option value="ultra">Ultra</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+  <label>Field of view <span id="o-fov"></span><input id="s-fov" type="range" min="60" max="110" step="1"/></label>
+  <label>Sensitivity <span id="o-sens"></span><input id="s-sens" type="range" min="0.3" max="3" step="0.1"/></label>
+  <label>Volume <span id="o-vol"></span><input id="s-vol" type="range" min="0" max="1" step="0.05"/></label>
+  <small>Quality changes the forest on the next run.</small>
+  <button class="btn" id="b-back">Back</button>
+</main>
+<main id="pause" class="screen">
+  <h2>Paused</h2>
+  <button class="btn" id="b-resume">Resume</button><button class="btn" id="b-pset">Settings</button>
+  <button class="btn" id="b-restart">Restart</button><button class="btn" id="b-menu">Main menu</button>
+</main>
+<main id="over" class="screen">
+  <h1>Game over</h1><div style="height:1.5rem"></div>
+  <div class="stat">Survived<b id="o-time"></b></div><div class="stat">Zombies killed<b id="o-kills"></b></div>
+  <div class="stat">Score<b id="o-score"></b></div><div class="stat">Best score<b id="o-best"></b></div><div style="height:1.5rem"></div>
+  <button class="btn" id="b-again">Play again</button><button class="btn" id="b-omenu">Main menu</button>
+</main>
+<main id="fatal" class="screen"><h2>Graphics unavailable</h2><p>This browser cannot create a WebGL2 context. Try a current Chrome, Edge, Firefox or Safari with hardware acceleration enabled.</p></main>
+<div id="rotate"><p>Rotate your device to landscape to play.</p></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
