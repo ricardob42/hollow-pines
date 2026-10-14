@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<meta name="theme-color" content="#050706"/>
+<title>Hollow Pines</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<style>
+:root{--bg:#050706;--bone:#d4cdb8;--dim:#8c8a7c;--gold:#b8a46a;--blood:#8a1c14;--fine:#7fae72;--caution:#d1a84a;--danger:#c0392b;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;font:16px/1.5 var(--serif)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--bone);user-select:none;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+#vig{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 16vmax rgba(138,28,20,.95);opacity:var(--v,0)}
+#fxv{position:fixed;inset:0;pointer-events:none;display:none;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.78) 100%)}.nopost #fxv{display:block}
+#grain{position:fixed;inset:-50%;pointer-events:none;background-image:var(--noise);mix-blend-mode:overlay;opacity:.16;animation:gr .9s steps(6) infinite}
+body:not(.nopost) #grain{opacity:.05}
+@keyframes gr{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}100%{transform:translate(0,0)}}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;justify-content:center;padding:max(7vmin,env(safe-area-inset-left));background:linear-gradient(90deg,rgba(3,5,4,.94),rgba(3,5,4,.7) 38%,rgba(3,5,4,.05) 78%)}
+.screen.on{display:flex}.screen>*{max-width:32rem}
+h1{font:400 clamp(2.6rem,9.5vmin,5.8rem)/.95 var(--serif);letter-spacing:.14em;text-transform:uppercase;text-shadow:0 0 30px rgba(0,0,0,.9)}
+h1 small{display:block;font-size:.2em;letter-spacing:.7em;color:var(--gold);margin:0 0 1.1rem .2em;opacity:.9}
+h1.dead{color:var(--blood);animation:fade 2.4s ease-out both}
+@keyframes fade{from{opacity:0;letter-spacing:.4em}to{opacity:1}}
+h2{font:400 clamp(1.8rem,5.5vmin,2.8rem)/1 var(--serif);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.4rem}
+.rule{height:1px;width:11rem;margin:1.3rem 0;background:linear-gradient(90deg,var(--gold),transparent)}
+.sub{font-style:italic;opacity:.7;margin-bottom:1.6rem}
+.btn{display:block;width:100%;text-align:left;background:none;border:0;border-left:2px solid transparent;color:var(--bone);font:400 1.15rem var(--serif);letter-spacing:.16em;text-transform:uppercase;padding:.7rem 1rem;cursor:pointer;transition:letter-spacing .25s,color .25s}
+.btn:hover,.btn:focus-visible{border-color:var(--gold);color:#fff;letter-spacing:.22em;background:linear-gradient(90deg,rgba(184,164,106,.14),transparent);outline:0}
+dl{display:grid;grid-template-columns:auto 1fr;gap:.2rem 1.4rem;margin-top:2rem;font-size:.82rem;letter-spacing:.06em;opacity:.65}dt{color:var(--gold)}
+.stat{display:flex;justify-content:space-between;border-bottom:1px solid rgba(212,205,184,.14);padding:.45rem 0;font-variant-numeric:tabular-nums;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem}
+.stat b{font-size:1.35rem;font-weight:400;letter-spacing:.02em}
+label{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid rgba(212,205,184,.12);letter-spacing:.08em;text-transform:uppercase;font-size:.9rem}
+select,input[type=range]{accent-color:var(--gold);background:var(--bg);color:var(--bone);border:1px solid rgba(212,205,184,.3);padding:.25rem;max-width:11rem;font:inherit}
+small{opacity:.55;display:block;margin:.7rem 0;font-style:italic}
+#hud{position:fixed;inset:0;pointer-events:none;font-variant-numeric:tabular-nums}#hud[hidden]{display:none}
+#cross{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:var(--bone);opacity:.8}
+#cross::after{content:"";position:absolute;inset:-9px;border:1px solid rgba(212,205,184,.35);border-radius:50%}
+#hm{position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px;border:2px solid var(--blood);transform:rotate(45deg);opacity:0}
+.hc{position:absolute;text-shadow:0 1px 4px #000}
+.tl{top:max(1rem,env(safe-area-inset-top));left:max(1.2rem,env(safe-area-inset-left));letter-spacing:.14em;text-transform:uppercase;font-size:.8rem;color:var(--dim)}
+#time{font-size:1.7rem;color:var(--bone);letter-spacing:.08em}
+.bl{bottom:max(1rem,env(safe-area-inset-bottom));left:max(1.2rem,env(safe-area-inset-left));width:min(15rem,38vw)}
+.br{bottom:max(1rem,env(safe-area-inset-bottom));right:max(1.2rem,env(safe-area-inset-right));text-align:right}
+#wname{letter-spacing:.2em;text-transform:uppercase;font-size:.8rem;color:var(--dim)}
+#ammo{font-size:2.2rem;letter-spacing:.04em;line-height:1.1}
+#slots{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.3rem}
+#slots span{width:1.5rem;height:1.5rem;display:grid;place-items:center;font-size:.72rem;border:1px solid rgba(212,205,184,.25);color:var(--dim)}
+#slots span.on{border-color:var(--gold);color:var(--gold);background:rgba(184,164,106,.14)}
+#fl{margin-top:.4rem;font-size:.7rem;letter-spacing:.24em;color:var(--gold)}#fl.off{color:var(--dim);opacity:.6}
+#ecg{--c:var(--fine)}#ecg.caution{--c:var(--caution)}#ecg.danger{--c:var(--danger)}
+#ecg .lab{font-size:.78rem;letter-spacing:.3em;color:var(--c);margin-bottom:.15rem}
+#ecg svg{display:block;width:100%;height:2.6rem;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+#ecg path{fill:none;stroke:var(--c);stroke-width:2;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px var(--c))}
+#ecg .sc{animation:ecg 2.4s linear infinite}#ecg.caution .sc{animation-duration:1.5s}#ecg.danger .sc{animation-duration:.75s}
+@keyframes ecg{to{transform:translateX(-240px)}}
+.bar{height:3px;background:rgba(212,205,184,.15);margin-top:.15rem}#hp{display:block;height:100%;width:100%;background:var(--c,var(--fine));transition:width .15s}
+#pausebtn{pointer-events:auto;position:absolute;top:max(1rem,env(safe-area-inset-top));right:max(1rem,env(safe-area-inset-right));background:rgba(5,7,6,.5);border:1px solid rgba(212,205,184,.3);color:var(--bone);width:2.6rem;height:2.6rem;border-radius:50%}
+#touch{position:fixed;inset:0;pointer-events:none}#touch[hidden]{display:none}
+#lookzone{position:absolute;right:0;top:0;width:58%;height:100%;pointer-events:auto}
+#stickzone{position:absolute;left:4vmin;bottom:5vmin;width:34vmin;height:34vmin;max-width:170px;max-height:170px;border-radius:50%;border:1px solid rgba(212,205,184,.3);pointer-events:auto;display:grid;place-items:center}
+#knob{width:42%;height:42%;border-radius:50%;background:rgba(212,205,184,.3)}
+.b{position:absolute;pointer-events:auto;width:15vmin;height:15vmin;max-width:68px;max-height:68px;border-radius:50%;border:1px solid rgba(212,205,184,.4);background:rgba(5,7,6,.5);color:var(--bone);font:.7rem var(--serif);letter-spacing:.08em;text-transform:uppercase}
+.b.on{background:rgba(184,164,106,.4)}.b.f{width:21vmin;height:21vmin;max-width:96px;max-height:96px;right:5vmin;bottom:6vmin}
+#rotate{position:fixed;inset:0;display:none;place-items:center;text-align:center;background:var(--bg);z-index:9;padding:2rem}#rotate.on{display:grid}
+@media (prefers-reduced-motion:reduce){#hp{transition:none}#grain,#ecg .sc,h1.dead{animation:none}.btn{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas><div id="fxv"></div><div id="vig"></div><div id="grain"></div>
+<div id="hud" hidden>
+  <div id="cross"></div><div id="hm"></div>
+  <div class="hc tl"><div>Survived</div><div id="time">0:00</div><div>Score <span id="score">0</span></div><div id="kills">0 kills</div></div>
+  <div class="hc bl"><div id="ecg" class="fine">
+    <div class="lab" id="cond">FINE</div>
+    <svg viewBox="0 0 240 48" preserveAspectRatio="none" aria-hidden="true"><g class="sc">
+      <path d="M0 28H34L40 28L46 24L52 28H70L76 33L82 5L88 43L94 28H128L136 21L144 28H240"/>
+      <path transform="translate(240 0)" d="M0 28H34L40 28L46 24L52 28H70L76 33L82 5L88 43L94 28H128L136 21L144 28H240"/></g></svg>
+    <div class="bar"><i id="hp"></i></div>
+  </div></div>
+  <div class="hc br"><div id="wname"></div><div id="ammo"></div><div id="slots"><span>1</span><span>2</span><span>3</span></div><div id="fl">LIGHT</div></div>
+  <button id="pausebtn" aria-label="Pause">II</button>
+</div>
+<div id="touch" hidden>
+  <div id="lookzone"></div><div id="stickzone"><div id="knob"></div></div>
+  <button class="b f" data-act="fire">Fire</button>
+  <button class="b" data-act="jump" style="right:5vmin;bottom:32vmin">Jump</button>
+  <button class="b" data-act="reload" style="right:25vmin;bottom:24vmin">Reload</button>
+  <button class="b" data-act="swap" style="right:26vmin;bottom:6vmin">Swap</button>
+  <button class="b" data-act="crouch" style="right:5vmin;bottom:50vmin">Crouch</button>
+  <button class="b" data-act="light" style="right:25vmin;bottom:42vmin">Light</button>
+</div>
+<main id="menu" class="screen">
+  <h1><small>A survival in the dark</small>Hollow<br/>Pines</h1>
+  <div class="rule"></div>
+  <p class="sub">Alone in the forest. A light, a blade, and whatever is left in the magazine. The night does not end.</p>
+  <button class="btn" id="b-play">Begin</button>
+  <button class="btn" id="b-set">Options</button>
+  <dl><dt>WASD</dt><dd>move</dd><dt>Shift / C / Space</dt><dd>sprint, crouch, jump</dd><dt>Mouse</dt><dd>aim, fire</dd><dt>R</dt><dd>reload</dd><dt>F</dt><dd>flashlight</dd><dt>1 2 3</dt><dd>rifle, pistol, knife</dd><dt>Esc</dt><dd>pause</dd></dl>
+</main>
+<main id="settings" class="screen">
+  <h2>Options</h2>
+  <label>Quality <select id="s-quality"><option value="auto">Auto</option><option value="ultra">Ultra</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+  <label>Field of view <span id="o-fov"></span><input id="s-fov" type="range" min="60" max="110" step="1"/></label>
+  <label>Sensitivity <span id="o-sens"></span><input id="s-sens" type="range" min="0.3" max="3" step="0.1"/></label>
+  <label>Volume <span id="o-vol"></span><input id="s-vol" type="range" min="0" max="1" step="0.05"/></label>
+  <small>Quality changes the forest, the shadows and the film effects on the next run.</small>
+  <button class="btn" id="b-back">Back</button>
+</main>
+<main id="pause" class="screen">
+  <h2>Paused</h2>
+  <button class="btn" id="b-resume">Resume</button><button class="btn" id="b-pset">Options</button>
+  <button class="btn" id="b-restart">Restart</button><button class="btn" id="b-menu">Main menu</button>
+</main>
+<main id="over" class="screen">
+  <h1 class="dead">You are dead</h1><div class="rule"></div>
+  <div class="stat">Survived<b id="o-time"></b></div><div class="stat">Creatures killed<b id="o-kills"></b></div>
+  <div class="stat">Score<b id="o-score"></b></div><div class="stat">Best score<b id="o-best"></b></div><div style="height:1.5rem"></div>
+  <button class="btn" id="b-again">Try again</button><button class="btn" id="b-omenu">Main menu</button>
+</main>
+<main id="fatal" class="screen"><h2>Graphics unavailable</h2><p>This browser cannot create a WebGL2 context. Try a current Chrome, Edge, Firefox or Safari with hardware acceleration enabled.</p></main>
+<div id="rotate"><p>Rotate your device to landscape to play.</p></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
