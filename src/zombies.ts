@@ -105,7 +105,7 @@ export class Zombie {
     this.type = type; this.kind = c.kind; this.hp = c.hp * hpM; this.speed = c.speed * spdM * (0.9 + Math.random() * 0.2); this.dmg = c.dmg; this.s = c.scale;
     this.torso.geometry = P.torso; this.head.geometry = P.head; this.aL.geometry = P.aL; this.aR.geometry = P.aR; this.lL.geometry = this.lR.geometry = P.leg;
     this.mat.color.setHex(c.tint).multiplyScalar(0.85 + Math.random() * 0.3);
-    this.lL.position.set(-K.leg, K.hip, 0); this.lR.position.set(K.leg, K.hip, 0); this.body.position.set(0, K.hip, 0); this.head.position.set(...K.neck);
+    this.lL.position.set(-K.leg, K.hip, 0); this.lR.position.set(K.leg, K.hip, 0); this.body.position.set(0, K.hip, 0); this.head.position.set(K.neck[0], K.neck[1], K.neck[2]);
     this.aL.position.set(-K.sh[0], K.sh[1], K.sh[2]); this.aR.position.set(K.sh[0], K.sh[1], K.sh[2]);
     this.group.scale.set(c.girth * c.scale, c.scale, c.girth * c.scale);
     this.group.position.set(x, heightAt(x, z), z); this.group.rotation.set(0, 0, 0);
