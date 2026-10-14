@@ -8,8 +8,8 @@ export default defineConfig({
     includeAssets: ['icon.svg'],
     manifest: {
       name: 'Hollow Pines', short_name: 'Hollow Pines',
-      description: 'Survival FPS against endless zombie hordes. Plays offline.',
-      theme_color: '#0e120d', background_color: '#0e120d',
+      description: 'Night survival horror in an endless forest. Flashlight, blade, rifle. Plays offline.',
+      theme_color: '#050706', background_color: '#050706',
       display: 'fullscreen', orientation: 'landscape', start_url: '/', scope: '/',
       icons: [
         { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },

@@ -1,6 +1,6 @@
 # Hollow Pines
 
-Survival FPS contra hordas infinitas de zombies en un bosque. Cliente puro (sin backend), PWA instalable, funciona offline tras la primera carga.
+Survival horror FPS nocturno contra hordas infinitas en un bosque: solo tienes la linterna acoplada a tu arma (rifle, pistola y cuchillo táctico). Cliente puro (sin backend), PWA instalable, funciona offline tras la primera carga.
 Stack: Vite 7 + TypeScript + Three.js (WebGL2) + vite-plugin-pwa (Workbox).
 
 ## Uso
@@ -17,12 +17,14 @@ npm run preview    # sirve dist/ para probar PWA/offline (el SW solo se registra
 3. Vercel sirve HTTPS; `sw.js` va con `no-cache` y el manifest con su `Content-Type` (ver `vercel.json`).
 
 ## Estructura
-`src/config.ts` (todos los valores de balance y calidad) · `world.ts` (terreno, vegetación instanciada, cielo, colisiones) · `player.ts` · `input.ts` (teclado/ratón/táctil) · `weapons.ts` · `zombies.ts` (pool, IA, `Horde`) · `fx.ts` (partículas en pool) · `audio.ts` (WebAudio procedural) · `perf.ts` (calidad adaptativa) · `store.ts` (localStorage) · `ui.ts` · `main.ts` (bucle y estados).
+`src/config.ts` (balance, calidad y `CFG.night` / `CFG.light` para ajustar la oscuridad y la linterna) · `world.ts` (cielo nocturno, luna, terreno, árboles procedurales, cementerio, colisiones) · `tex.ts` (texturas procedurales) · `light.ts` (linterna, haz volumétrico, polvo y niebla) · `post.ts` (bloom, grano, viñeta, gradación) · `player.ts` · `input.ts` (teclado/ratón/táctil) · `weapons.ts` · `zombies.ts` (dos diseños procedurales: caminante con traje y ghoul encorvado; pool, IA, `Horde`) · `fx.ts` (partículas en pool) · `audio.ts` (WebAudio procedural) · `perf.ts` (calidad adaptativa) · `store.ts` (localStorage) · `ui.ts` · `main.ts` (bucle y estados).
 
 ## Cómo funciona lo importante
 - **Hordas infinitas, entidades acotadas:** 120/90/60/36 zombies simultáneos máx. (Ultra/High/Medium/Low), reutilizados desde un pool fijo. El objetivo crece con una curva suave en `CFG.horde`; `Perf` reduce resolución y luego el tope si el FPS cae < 42 durante 3 s.
 - **Fin de partida:** solo `player.hp <= 0`.
-- **Audio:** sin archivos; todo se sintetiza, los gruñidos son posicionales (HRTF).
+- **Audio:** sin archivos; todo se sintetiza (viento, grillos, búho, latido con poca vida), los gruñidos son posicionales (HRTF).
+- **Estética:** noche cerrada con niebla densa; la única luz propia es la linterna del arma equipada (tecla F la apaga/enciende). Ultra/High usan sombras de linterna y luna, bloom y grano; Low renderiza directo sin postproceso.
+- **Si se ve demasiado oscuro/claro:** `CFG.night.exposure`, `CFG.night.fog` y `CFG.light.power` en `config.ts`.
 - **Assets propios:** no se requieren. Para texturas PBR/modelos glTF, colócalos en `public/` y añade su extensión a `workbox.globPatterns` en `vite.config.ts`.
 
 ## Checklist de pruebas

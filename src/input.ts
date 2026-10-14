@@ -1,14 +1,14 @@
 import { $ } from './ui';
 /** Keyboard/mouse (pointer lock) + touch (virtual joystick, look drag, buttons). Auto-detects touch devices. */
 export class Input {
-  keys = new Set<string>(); look = { x: 0, y: 0 }; fire = false; jump = false; reload = false;
+  keys = new Set<string>(); look = { x: 0, y: 0 }; fire = false; jump = false; reload = false; light = false;
   swap = -1; /* -1 none, 0..2 weapon, -2 cycle */ sens = 1; locked = false;
   touch = matchMedia('(pointer:coarse)').matches;
   private st = { x: 0, y: 0 }; private tc = false;
   constructor(canvas: HTMLElement, onUnlock: () => void) {
     addEventListener('keydown', (e) => {
       if (e.repeat) return; this.keys.add(e.code);
-      if (e.code === 'KeyR') this.reload = true; if (e.code === 'Space') this.jump = true;
+      if (e.code === 'KeyR') this.reload = true; if (e.code === 'KeyF') this.light = true; if (e.code === 'Space') this.jump = true;
       const n = ['Digit1', 'Digit2', 'Digit3'].indexOf(e.code); if (n >= 0) this.swap = n;
     });
     addEventListener('keyup', (e) => this.keys.delete(e.code));
@@ -48,7 +48,7 @@ export class Input {
       b.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (a === 'fire') this.fire = true; else if (a === 'jump') this.jump = true; else if (a === 'reload') this.reload = true;
-        else if (a === 'swap') this.swap = -2; else if (a === 'crouch') { this.tc = !this.tc; b.classList.toggle('on', this.tc); }
+        else if (a === 'swap') this.swap = -2; else if (a === 'light') this.light = true; else if (a === 'crouch') { this.tc = !this.tc; b.classList.toggle('on', this.tc); }
       });
       const off = () => { if (a === 'fire') this.fire = false; };
       b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);

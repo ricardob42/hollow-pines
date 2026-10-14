@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { registerSW } from 'virtual:pwa-register';
 import { CFG, QUALITY, ZOMBIES, type Q } from './config';
+import { Post } from './post';
 import { save, persist } from './store';
 import { sfx } from './audio';
 import { World, heightAt } from './world';
@@ -10,7 +11,7 @@ import { Weapons } from './weapons';
 import { Zombies, Horde } from './zombies';
 import { Fx } from './fx';
 import { Perf } from './perf';
-import { $, show, text, fmt } from './ui';
+import { $, show, text, fmt, initGrain } from './ui';
 
 try { registerSW({ immediate: true }); } catch (e) { console.warn('Service worker unavailable', e); }
 
@@ -20,14 +21,15 @@ let renderer: THREE.WebGLRenderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !matchMedia('(pointer:coarse)').matches, powerPreference: 'high-performance' }); }
 catch { show('fatal'); throw new Error('WebGL2 unavailable'); }
 canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); show('fatal'); });
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.5; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = CFG.night.exposure; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1200); scene.add(camera);
-const world = new World(scene), fx = new Fx(scene), player = new Player(), horde = new Horde();
-const zombies = new Zombies(scene, QUALITY.ultra.cap), weapons = new Weapons(camera, fx), perf = new Perf(renderer, () => resize());
+const fx = new Fx(scene), weapons = new Weapons(camera, fx), world = new World(scene, weapons.torch.U), player = new Player(), horde = new Horde();
+const zombies = new Zombies(scene, QUALITY.ultra.cap), post = new Post(renderer, scene, camera), perf = new Perf(renderer, () => resize());
 const input = new Input(canvas, () => { if (state === 'playing') setState('paused'); });
 const set = save.settings;
-let state: S = 'menu', back: S = 'menu', score = 0, kills = 0, time = 0, last = performance.now(), idle = 0;
+let state: S = 'menu', back: S = 'menu', score = 0, kills = 0, time = 0, last = performance.now(), idle = 0, beat = 0, cond = '';
+const slots = Array.from($('slots').children);
 
 function detect(): Q {
   const mem = (navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 4, cores = navigator.hardwareConcurrency ?? 4;
@@ -42,15 +44,18 @@ const quality = (): Q => (set.quality === 'auto' ? auto : set.quality);
 
 function resize(): void {
   const w = innerWidth, h = innerHeight;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, perf.pr)); renderer.setSize(w, h, false);
+  const pr = Math.min(devicePixelRatio, perf.pr); renderer.setPixelRatio(pr); renderer.setSize(w, h, false); post.size(w, h, pr); world.setScale(h * pr * 0.5);
   camera.aspect = w / h; camera.fov = set.fov; camera.updateProjectionMatrix();
   $('rotate').classList.toggle('on', input.touch && h > w);
 }
 function applySettings(): void { camera.fov = set.fov; camera.updateProjectionMatrix(); input.sens = set.sens; sfx.setVolume(set.volume); }
-function applyQuality(): void { const Qc = QUALITY[quality()]; world.build(quality()); perf.reset(Qc.pr); resize(); }
+function applyQuality(): void {
+  const Qc = QUALITY[quality()]; world.build(quality()); weapons.torch.setShadow(Qc.shadow); post.setup(Qc.post, Qc.msaa);
+  document.body.classList.toggle('nopost', Qc.post === 0); perf.reset(Qc.pr); resize();
+}
 
 function setState(s: S): void {
-  state = s; show(s === 'playing' ? null : s === 'paused' ? 'pause' : s); weapons.visible(s === 'playing' || s === 'paused');
+  state = s; world.setMenu(s === 'menu' || s === 'over'); show(s === 'playing' ? null : s === 'paused' ? 'pause' : s); weapons.visible(s === 'playing' || s === 'paused');
   if (s === 'playing') {
     sfx.init();
     if (input.touch) { try { void document.documentElement.requestFullscreen?.(); void (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock?.('landscape')?.catch(() => {}); } catch { /* optional */ } }
@@ -59,7 +64,7 @@ function setState(s: S): void {
   if (s === 'menu') applyQuality();
 }
 function start(): void {
-  applyQuality(); player.reset(); weapons.reset(); zombies.reset(); horde.reset(); score = kills = time = 0; setState('playing');
+  applyQuality(); player.reset(); weapons.reset(); zombies.reset(); horde.reset(); score = kills = time = beat = 0; setState('playing');
 }
 function gameOver(): void {
   sfx.die(); save.bestScore = Math.max(save.bestScore, Math.floor(score)); save.bestTime = Math.max(save.bestTime, Math.floor(time)); persist();
@@ -80,6 +85,9 @@ function update(dt: number): void {
   score += dt * mult() * 2; sfx.tick(Math.min(1, zombies.live.length / 40), camera);
   const h = weapons.hud(), low = player.hp < 35 ? 0.3 + 0.15 * Math.sin(time * 6) : 0;
   text('time', fmt(time)); text('score', String(Math.floor(score))); text('kills', `${kills} kills`); text('wname', h.name); text('ammo', h.ammo);
+  slots.forEach((e, i) => e.classList.toggle('on', i === h.cur)); text('fl', h.light ? 'LIGHT' : 'LIGHT OFF'); $('fl').classList.toggle('off', !h.light);
+  const c = player.hp > 66 ? 'fine' : player.hp > 33 ? 'caution' : 'danger'; if (c !== cond) { cond = c; text('cond', c.toUpperCase()); $('ecg').className = c; }
+  if (player.hp < 35 && time > beat) { sfx.heart(); beat = time + (player.hp < 18 ? 0.62 : 0.9); }
   $('hp').style.width = `${Math.max(0, player.hp)}%`; $('hm').style.opacity = String(weapons.hit);
   $('vig').style.setProperty('--v', String(Math.max(player.hurtT * 0.9, low)));
   if (player.hp <= 0) gameOver();
@@ -93,7 +101,8 @@ function tick(now: number): void {
     camera.lookAt(0, 5, 0);
   }
   world.follow(state === 'playing' || state === 'paused' ? player.pos : camera.position, camera.position, now / 1000); fx.update(dt);
-  renderer.render(scene, camera);
+  const live = state === 'playing' || state === 'paused';
+  post.render(dt, now / 1000, live ? player.hurtT : 0, live && player.hp < 35 ? 1 - player.hp / 35 : 0);
 }
 
 // UI wiring
@@ -111,4 +120,4 @@ const autoPause = () => { if (state === 'playing') setState('paused'); };
 addEventListener('blur', autoPause); document.addEventListener('visibilitychange', () => { if (document.hidden) autoPause(); });
 addEventListener('resize', resize); addEventListener('orientationchange', resize);
 
-sync(); applySettings(); applyQuality(); setState('menu'); renderer.setAnimationLoop(tick);
+initGrain(); sync(); applySettings(); applyQuality(); setState('menu'); renderer.setAnimationLoop(tick);
