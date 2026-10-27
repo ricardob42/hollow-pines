@@ -64,13 +64,15 @@ function setState(s: S): void {
   if (s === 'menu') applyQuality();
 }
 function start(): void {
-  applyQuality(); player.reset(); weapons.reset(); zombies.reset(); horde.reset(); score = kills = time = beat = 0; setState('playing');
+  applyQuality(); player.reset(); weapons.reset(); zombies.reset(); horde.reset(); score = kills = time = beat = 0; $('boss').hidden = true; $('alert').classList.remove('on'); setState('playing');
 }
 function gameOver(): void {
   sfx.die(); save.bestScore = Math.max(save.bestScore, Math.floor(score)); save.bestTime = Math.max(save.bestTime, Math.floor(time)); persist();
   text('o-time', fmt(time)); text('o-kills', String(kills)); text('o-score', String(Math.floor(score))); text('o-best', String(save.bestScore));
   $('vig').style.setProperty('--v', '0'); setState('over');
 }
+/** Centered one-line warning (restarts its fade each time). */
+function flash(t: string): void { const e = $('alert'); e.textContent = t; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); }
 const mult = () => 1 + Math.min(3, Math.floor(time / 60) * 0.25);
 
 weapons.onKill = (z) => {
@@ -82,7 +84,9 @@ function update(dt: number): void {
   weapons.update(dt, input, player, zombies, world, camera);
   horde.capScale = perf.capScale; horde.update(dt, zombies, player.pos, camera, world, QUALITY[quality()].cap);
   zombies.update(dt, player.pos, world, (d) => player.hurt(d));
-  score += dt * mult() * 2; sfx.tick(Math.min(1, zombies.live.length / 40), camera);
+  score += dt * mult() * 2; sfx.tick(Math.min(1, zombies.alive / 40), camera);
+  if (horde.note) { flash(horde.note); horde.note = null; } if (zombies.note) { flash(zombies.note); zombies.note = null; }
+  const boss = zombies.boss(); $('boss').hidden = !boss; if (boss) $('bhp').style.width = `${Math.max(0, (boss.hp / boss.maxHp) * 100)}%`;
   const h = weapons.hud(), low = player.hp < 35 ? 0.3 + 0.15 * Math.sin(time * 6) : 0;
   text('time', fmt(time)); text('score', String(Math.floor(score))); text('kills', `${kills} kills`); text('wname', h.name); text('ammo', h.ammo);
   slots.forEach((e, i) => e.classList.toggle('on', i === h.cur)); text('fl', h.light ? 'LIGHT' : 'LIGHT OFF'); $('fl').classList.toggle('off', !h.light);

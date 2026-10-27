@@ -59,8 +59,12 @@ class Sfx {
   swap(): void { this.noise(0.07, 0.2, 2000, 800); }
   knife(): void { this.noise(0.15, 0.25, 7000, 2500); }
   hit(pos: THREE.Vector3, head: boolean): void { this.noise(0.08, 0.3, 1200, 200, pos); this.tone(head ? 520 : 150, 0.1, 'triangle', 0.2, undefined, pos); }
-  groan(pos: THREE.Vector3, ghoul = false): void {
-    if (ghoul) { const f = 150 + Math.random() * 70; this.tone(f, 0.7, 'sawtooth', 0.1, f * 1.6, pos); this.noise(0.8, 0.09, 2400, 600, pos); return; }   // raspy, higher
+  /** One voice per enemy: low zombie moan, raspy Crimson Head, dog bark, Tyrant roar, Lisa's wail. */
+  groan(pos: THREE.Vector3, type = 'zombie'): void {
+    if (type === 'dog') { this.noise(0.18, 0.12, 1800, 300, pos); this.tone(300, 0.18, 'sawtooth', 0.14, 160, pos); return; }
+    if (type === 'tyrant') { this.tone(48, 1.2, 'sawtooth', 0.2, 34, pos); this.noise(1, 0.12, 400, 80, pos); return; }
+    if (type === 'lisa') { this.tone(420, 1.1, 'sawtooth', 0.12, 170, pos); this.noise(1.1, 0.1, 3200, 700, pos); this.tone(90, 1.2, 'sawtooth', 0.14, 60, pos); return; }
+    if (type === 'crimson') { const f = 150 + Math.random() * 70; this.tone(f, 0.7, 'sawtooth', 0.1, f * 1.6, pos); this.noise(0.8, 0.09, 2400, 600, pos); return; }
     const f = 70 + Math.random() * 30; this.tone(f, 0.9, 'sawtooth', 0.12, f * 0.6, pos); this.noise(0.7, 0.05, 500, 100, pos);
   }
   click(): void { this.noise(0.02, 0.3, 5000, 2000); this.tone(1800, 0.02, 'square', 0.06); }
