@@ -35,3 +35,11 @@ npm run preview    # sirve dist/ para probar PWA/offline (el SW solo se registra
 - [ ] Network "Offline" + recargar: el juego arranca y se juega.
 - [ ] Partida de 15+ min: la memoria (Performance Monitor) se mantiene estable.
 - [ ] Forzar WebGL2 sin GPU (flag del navegador): calidad cae a Low automáticamente.
+
+## Enemigos (mecánicas de Resident Evil remake, GameCube)
+- **Zombie**: lento, aguanta mucho. Si no muere de un disparo a la cabeza, **resucita como Crimson Head** (~25 s) salvo que destruyas su cabeza en el suelo (disparo o cuchillo). Antes de levantarse tiembla y le brillan los ojos.
+- **Crimson Head**: piel desollada, más rápido y con más daño; no vuelve a resucitar.
+- **Cerberus (perro)**: el enemigo más rápido, poca vida, aparece en manadas de 2-3.
+- **Tyrant**: tanque con una garra enorme; muy resistente y de golpe fuerte.
+- **Lisa Trevor**: jefe final. Aparece cada 6 minutos (uno a la vez, cada vez más fuerte) con barra de vida arriba.
+Todo se ajusta en `ZOMBIES` (`src/config.ts`) y el reparto en `Horde.pick()` (`src/zombies.ts`).
